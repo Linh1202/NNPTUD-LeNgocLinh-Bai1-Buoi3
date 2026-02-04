@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Dashboard</title>
+    <meta name="description"
+        content="Dashboard hiển thị danh sách sản phẩm với các thông tin id, title, price, category và images">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --text-dark: #1a1a2e;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--dark-bg);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(118, 75, 162, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(240, 147, 251, 0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(79, 172, 254, 0.1) 0px, transparent 50%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .dashboard-header {
+            background: var(--primary-gradient);
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+
+        .dashboard-title {
+            color: white;
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .dashboard-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .stats-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-icon.products {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .stats-icon.categories {
+            background: var(--secondary-gradient);
+            color: white;
+        }
+
+        .stats-icon.total {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: #e2e8f0;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+        }
+
+        .table thead th {
+            color: #1a202c !important;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.95rem;
+            border: none;
+            padding: 1.2rem 1rem;
+            text-shadow: none;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+        }
+
+        .table tbody td {
+            padding: 1.2rem 1rem;
+            vertical-align: middle;
+            color: var(--text-dark);
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .product-image:hover {
+            transform: scale(1.5);
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .price-badge {
+            background: var(--success-gradient);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(79, 172, 254, 0.3);
+        }
+
+        .category-badge {
+            background: var(--secondary-gradient);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(240, 147, 251, 0.3);
+        }
+
+        .id-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .product-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3rem;
+        }
+
+        .search-box {
+            background: var(--card-bg);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.2);
+            outline: none;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 0.6rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .page-link:hover {
+            background: var(--primary-gradient);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary-gradient);
+            border-color: transparent;
+        }
+
+        /* Description Tooltip */
+        .product-row {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .description-tooltip {
+            position: fixed;
+            background: rgba(26, 26, 46, 0.98);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            max-width: 400px;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .description-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .description-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 20px;
+            width: 12px;
+            height: 12px;
+            background: rgba(26, 26, 46, 0.98);
+            transform: rotate(45deg);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .tooltip-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .product-row:hover {
+            background: rgba(102, 126, 234, 0.08) !important;
+        }
+
+        /* Search Highlight */
+        .search-highlight {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: #1a1a2e;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(253, 160, 133, 0.3);
+        }
+
+        #searchStats {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            display: none;
+        }
+
+        /* Page Size Selector */
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .page-size-selector label {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .page-size-selector .form-select {
+            background: var(--card-bg);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .page-size-selector .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.2);
+            outline: none;
+        }
+
+        .page-size-selector .form-select:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .page-size-selector i {
+            color: #667eea;
+        }
+
+        /* Sortable Headers */
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            position: relative;
+            color: #1a202c !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
+        }
+
+        .sortable-header:hover {
+            background: rgba(99, 102, 241, 0.15) !important;
+            transform: translateY(-2px);
+            color: #1a202c !important;
+        }
+
+        .sortable-header:active {
+            transform: translateY(0);
+        }
+
+        .sort-icon {
+            color: #5b21b6;
+            opacity: 1;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-left: 0.3rem;
+        }
+
+        .sortable-header:hover .sort-icon {
+            opacity: 1;
+            color: #6366f1;
+            transform: scale(1.15);
+        }
+
+        .sort-icon.active {
+            opacity: 1;
+            color: #ec4899;
+            transform: scale(1.2);
+            text-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+            animation: sortPulse 0.5s ease;
+        }
+
+        @keyframes sortPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Export Button */
+        .btn-export {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        }
+
+        .btn-export:hover {
+            background: linear-gradient(135deg, #0e8074 0%, #2dd467 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+            color: white;
+        }
+
+        .btn-export:active {
+            transform: translateY(0);
+        }
+
+        /* Export Success Message */
+        .export-success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(56, 239, 125, 0.3);
+            z-index: 10000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        }
+
+        .export-success-message.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .export-success-message i {
+            font-size: 1.2rem;
+        }
+
+        /* Product Modal */
+        .product-modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .product-modal-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .product-modal-header .modal-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .product-images {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+
+        .product-images img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-images img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-body .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body .form-control {
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-body .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.2);
+        }
+
+        .modal-body .form-control:read-only {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-footer .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .modal-footer .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+
+        .modal-footer .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .product-row {
+            cursor: pointer;
+        }
+
+        .product-row td {
+            transition: all 0.3s ease;
+        }
+
+        /* Create Button */
+        .btn-create {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        }
+
+        .btn-create:hover {
+            background: linear-gradient(135deg, #0e8074 0%, #2dd467 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+            color: white;
+        }
+
+        .btn-create:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header text-center fade-in">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div></div>
+                <div>
+                    <h1 class="dashboard-title mb-0">
+                        <i class="bi bi-speedometer2 me-3"></i>Product Dashboard
+                    </h1>
+                </div>
+                <div>
+                    <button class="btn btn-create" id="createProductBtn">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Tạo mới
+                    </button>
+                </div>
+            </div>
+            <p class="dashboard-subtitle">Quản lý và theo dõi sản phẩm một cách hiệu quả</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4" id="statsContainer">
+            <div class="col-md-4">
+                <div class="stats-card fade-in">
+                    <div class="stats-icon products">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h3 class="stats-value" id="totalProducts">0</h3>
+                    <p class="stats-label">Tổng sản phẩm</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card fade-in" style="animation-delay: 0.1s;">
+                    <div class="stats-icon categories">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                    </div>
+                    <h3 class="stats-value" id="totalCategories">0</h3>
+                    <p class="stats-label">Danh mục</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card fade-in" style="animation-delay: 0.2s;">
+                    <div class="stats-icon total">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <h3 class="stats-value" id="avgPrice">$0</h3>
+                    <p class="stats-label">Giá trung bình</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Section -->
+        <div class="filter-section fade-in" style="animation-delay: 0.3s;">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" id="searchInput" class="form-control search-box"
+                        placeholder="🔍 Tìm kiếm sản phẩm theo tên...">
+                </div>
+                <div class="col-md-3">
+                    <select id="categoryFilter" class="form-select search-box">
+                        <option value="">Tất cả danh mục</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button id="exportCsvBtn" class="btn btn-export w-100">
+                        <i class="bi bi-download me-2"></i>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results Stats -->
+        <div id="searchStats" class="text-center"></div>
+
+        <!-- Products Table -->
+        <div class="table-container fade-in" style="animation-delay: 0.4s;">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hình ảnh</th>
+                            <th class="sortable-header" data-sort="title">
+                                Tên sản phẩm
+                                <i class="sort-icon bi bi-arrow-down-up ms-2"></i>
+                            </th>
+                            <th class="sortable-header" data-sort="price">
+                                Giá
+                                <i class="sort-icon bi bi-arrow-down-up ms-2"></i>
+                            </th>
+                            <th>Danh mục</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Loading Spinner -->
+                        <tr>
+                            <td colspan="5" class="loading-spinner">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <!-- Page Size Selector -->
+                <div class="page-size-selector">
+                    <label for="pageSizeSelector" class="me-2">
+                        <i class="bi bi-grid-3x3-gap-fill me-1"></i>
+                        <span>Hiển thị:</span>
+                    </label>
+                    <select id="pageSizeSelector" class="form-select form-select-sm d-inline-block"
+                        style="width: auto;">
+                        <option value="5">5 sản phẩm</option>
+                        <option value="10" selected>10 sản phẩm</option>
+                        <option value="20">20 sản phẩm</option>
+                    </select>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Product pagination">
+                    <ul class="pagination mb-0" id="pagination">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description Tooltip -->
+    <div class="description-tooltip" id="descriptionTooltip">
+        <div class="tooltip-title">📝 Mô tả sản phẩm</div>
+        <div class="tooltip-content" id="tooltipContent"></div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content product-modal-content">
+                <div class="modal-header product-modal-header">
+                    <h5 class="modal-title" id="productModalLabel">
+                        <i class="bi bi-box-seam me-2"></i>
+                        Chi tiết sản phẩm
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Product Images -->
+                    <div class="product-images mb-4" id="productImages">
+                        <!-- Images will be inserted here -->
+                    </div>
+
+                    <!-- Product Form -->
+                    <form id="productForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="productId" class="form-label">
+                                    <i class="bi bi-hash me-1"></i>ID
+                                </label>
+                                <input type="text" class="form-control" id="productId" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productPrice" class="form-label">
+                                    <i class="bi bi-currency-dollar me-1"></i>Giá
+                                </label>
+                                <input type="number" class="form-control" id="productPrice" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="productTitle" class="form-label">
+                                <i class="bi bi-pencil me-1"></i>Tên sản phẩm
+                            </label>
+                            <input type="text" class="form-control" id="productTitle" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="productCategory" class="form-label">
+                                <i class="bi bi-tag me-1"></i>Danh mục
+                            </label>
+                            <input type="text" class="form-control" id="productCategory" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label">
+                                <i class="bi bi-text-paragraph me-1"></i>Mô tả
+                            </label>
+                            <textarea class="form-control" id="productDescription" rows="4" required></textarea>
+                        </div>
+                    </form>
+
+                    <!-- Loading & Success Messages -->
+                    <div id="modalMessage" class="alert d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Đóng
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveProductBtn">
+                        <i class="bi bi-save me-2"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Product Modal -->
+    <div class="modal fade" id="createProductModal" tabindex="-1" aria-labelledby="createProductModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content product-modal-content">
+                <div class="modal-header product-modal-header"
+                    style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <h5 class="modal-title" id="createProductModalLabel">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Tạo sản phẩm mới
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Create Product Form -->
+                    <form id="createProductForm">
+                        <div class="mb-3">
+                            <label for="newProductTitle" class="form-label">
+                                <i class="bi bi-pencil me-1"></i>Tên sản phẩm <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="newProductTitle" required
+                                placeholder="Nhập tên sản phẩm">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="newProductPrice" class="form-label">
+                                    <i class="bi bi-currency-dollar me-1"></i>Giá <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="newProductPrice" required placeholder="0"
+                                    min="0" step="0.01">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="newProductCategoryId" class="form-label">
+                                    <i class="bi bi-tag me-1"></i>Category ID <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="newProductCategoryId" required
+                                    placeholder="1" min="1">
+                                <small class="text-muted">Ví dụ: 1, 2, 3...</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newProductDescription" class="form-label">
+                                <i class="bi bi-text-paragraph me-1"></i>Mô tả <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="newProductDescription" rows="4" required
+                                placeholder="Nhập mô tả sản phẩm"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newProductImages" class="form-label">
+                                <i class="bi bi-image me-1"></i>URL hình ảnh <span class="text-danger">*</span>
+                            </label>
+                            <input type="url" class="form-control" id="newProductImages" required
+                                placeholder="https://example.com/image.jpg">
+                            <small class="text-muted">Nhập URL hình ảnh sản phẩm</small>
+                        </div>
+                    </form>
+
+                    <!-- Loading & Success Messages -->
+                    <div id="createModalMessage" class="alert d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>Hủy
+                    </button>
+                    <button type="button" class="btn btn-success" id="createProductSubmitBtn">
+                        <i class="bi bi-check-circle me-2"></i>Tạo sản phẩm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Main JS -->
+    <script src="main.js"></script>
+</body>
+
+</html>
